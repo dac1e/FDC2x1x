@@ -1,22 +1,28 @@
-// This is a source file for FDC2x1x library
-// By Harijs Zablockis, Intelitech, March 2018 
-// This file is based on NelsonsLog_FDC2x1x.c by Chris Nelson
-//
-// The 16 bit output overflow bug is fixed.
-// Configuration is made more dynamic and register comments are made readable 
-// Added other channels
-// Added masking out error bits from data 
-// Some junk code and header form original file left for historical value
-// 
-// There is no warranty to the code. There is no support, don't ask for it.
-// Use or skip on your own responsibility.
-// NOT ALL FEATURES ARE TESTED! 
-//
-// The code might get revisited at some point or it might not.
-// The code does more than I need at the moment.
-//
-// Feel free to do whatever you want with it. No licensing BS. No limitations.
-//
+/*
+  FDC2x1x - Arduino libary for driving the Texas Instruments FDC2112,FDC2114,FDC2212,FDC2214 chips Copyright (c)
+  2025 Wolfgang Schmieder.  All right reserved.
+
+  Based on https://github.com/zharijs/FDC2214
+
+  Contributors:
+  - Wolfgang Schmieder
+
+  Project home: https://github.com/dac1e/Somo1ELV/
+
+  This library is free software; you can redistribute it and/or modify it
+  the terms of the GNU Lesser General Public License as under published
+  by the Free Software Foundation; either version 3.0 of the License,
+  or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+*/
 
 #include "FDC2x1x.h"
 
@@ -157,16 +163,6 @@ const size_t FDC2x1x::getChannelCount() const {
   return 0;
 }
 
-bool FDC2x1x::begin(uint8_t channelMask, uint8_t deglitchValue, uint8_t, bool useInternalOscillator) {
-  _wire.begin();
-  const FDC2x1x_DEVICE device = getDevice();
-  const bool bOk = (device != FDC2x1x_DEVICE_INVALID);
-  if (bOk) {
-    loadSettings(channelMask, false, deglitchValue, useInternalOscillator, FDC2x1x_GAIN_1);
-  }
-  return bOk;
-}
-
 FDC2x1x_DEVICE FDC2x1x::begin(uint8_t chanMask, bool enableSleepMode, FDC2x1x_DEGLITCH deglitchValue, bool useInternalOscillator, FDC2x1x_GAIN gain) {
   _wire.begin();
   const FDC2x1x_DEVICE device = getDevice();
@@ -274,49 +270,6 @@ bool FDC2x1x::loadSettings(uint8_t chanMask, bool enableSleepMode, uint8_t degli
 
   return bOk;
 }
-
-///**************************************************************************/
-///*!
-//    @brief  Given a reading calculates the sensor frequency
-//*/
-///**************************************************************************/
-//long long NelsonsLog_FDC2x1x::calculateFsensor(unsigned long reading){
-////    Serial.println("reading: "+ String(reading));
-//    //fsensor = (CH_FIN_SEL * fref * data) / 2 ^ 28
-//    //should be mega hz so can truncate to long long
-//    Serial.println("FDC reading: " + String(reading));
-//    unsigned long long temp;
-//    temp = 1 * 40000000 * reading;
-//    temp = temp / (2^28);
-////    Serial.println("frequency: " + String((long)temp));
-//    return temp;
-//}
-
-///**************************************************************************/
-///*!
-//    @brief  Given sensor frequency calculates capacitance
-//*/
-///**************************************************************************/
-//double NelsonsLog_FDC2x1x::calculateCapacitance(long long fsensor){
-//    //differential configuration
-//    //c sensor = 1                            - (Cboard + Cparacitic)
-//    //             / (L * (2*pi * fsensor)^2)
-//
-//    double pi = 3.14159265359;
-//    double L = 18; //uH
-//    double Cboard = 33; //pf
-//    double Cparacitic = 3; //pf
-//
-//    double temp = 2 * pi * fsensor;
-//    temp = temp * temp;
-//
-//    temp = temp / 1000000; //uH
-//    temp *= L;
-//
-////    Serial.println("capacitance: " + String(temp));
-//    return temp;
-//
-//}
 
 // inline because called once.
 inline bool FDC2x1x::readMsbLsb(unsigned long& reading, const int addressMSB, const int addressLSB) const {
@@ -432,7 +385,7 @@ int FDC2x1x::enableSleepMode() {
     config |= FDC2x1x_SLEEP_MASK;
     write16FDC(FDC2x1x_CONFIG, config);
     return false;
-    }
+  }
   return config;
 }
 
@@ -449,34 +402,6 @@ int FDC2x1x::disableSleepMode() {
   }
   return config;
 }
-
-///**************************************************************************/
-///*!
-//    @brief  Takes a reading and calculates capacitance from it
-//*/
-///**************************************************************************/
-//double NelsonsLog_FDC2x1x::readCapacitance() {
-//    int timeout = 100;
-//    unsigned long reading = 0;
-//    long long fsensor = 0;
-//    int status = read16FDC(FDC2x1x_STATUS_REGADDR);
-//    while (timeout && !(status & FDC2x1x_CH0_UNREADCONV)) {
-////        Serial.println("status: " + String(status));
-//        status = read16FDC(FDC2x1x_STATUS_REGADDR);
-//        timeout--;
-//    }
-//    if (timeout) {
-//        //read the 28 bit result
-//        reading = read16FDC(FDC2x1x_DATA_CH0_REGADDR) << 16;
-//        reading |= read16FDC(FDC2x1x_DATA_LSB_CH0_REGADDR);
-//        fsensor = calculateFsensor(reading);
-//        return calculateCapacitance(fsensor);
-//    } else {
-//        //error not reading
-//        Serial.println("error reading fdc");
-//        return 0;
-//    }
-//}
 
 /**************************************************************************/
 /*!

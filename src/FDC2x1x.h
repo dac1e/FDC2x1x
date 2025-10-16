@@ -1,22 +1,33 @@
-// This is a header file for FDC2x1x library
-// By Harijs Zablockis, Intelitech, March 2018 
-// This file is heavily based on NelsonsLog_FDC2214.h by Chris Nelson 
-// Masks and channels added
-//
-// There is no warranty to the code. There is no support, don't ask for it.
-// Use or skip on your own responsibility.
-// NOT ALL FEATURES ARE TESTED! 
-//
-// The code might get revisited at some point or it might not.
-// The code does more than I need at the moment.
-//
-// Feel free to do whatever you want with it. No licensing BS. No limitations.
-//
+/*
+  FDC2x1x - Arduino libary for driving the Texas Instruments FDC2112,FDC2114,FDC2212,FDC2214 chips Copyright (c)
+  2025 Wolfgang Schmieder.  All right reserved.
+
+  Based on https://github.com/zharijs/FDC2214
+
+  Contributors:
+  - Wolfgang Schmieder
+
+  Project home: https://github.com/dac1e/Somo1ELV/
+
+  This library is free software; you can redistribute it and/or modify it
+  the terms of the GNU Lesser General Public License as under published
+  by the Free Software Foundation; either version 3.0 of the License,
+  or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+*/
 
 #pragma once
 
-#ifndef _FDC2214_H_
-#define _FDC2214_H_
+#ifndef FDC2x1x_API_H_
+#define FDC2x1x_API_H_
 
 #include <stdint.h>
 #include <Wire.h>
@@ -47,59 +58,52 @@ enum FDC2x1x_GAIN : uint16_t {
   FDC2x1x_GAIN_16 = 3,
 };
 
+// This value is returned by function FDC2x1x::getReading() in case of an error.
 static constexpr unsigned long FDC2x1x_INVALID_READING = 0xffffffff;
 
+// Refer to Texas Instruments FDC2212, FDC2214, FDC2112, FDC2114 documentation
 class FDC2x1x {
 public:
+    // Local Alias for FDC2x1x_INVALID_READING.
     static constexpr unsigned long INVALID_READING = FDC2x1x_INVALID_READING;
 
-    // For using a different supported I2C interface pass Wire2, Wire3... as second parameter.
+    // For using a different I2C interface pass Wire2, Wire3... as second parameter
+    // if supported by the Arduino board.
     FDC2x1x(FDC2x1x_I2C_ADDR i2caddr, typeof(Wire)& wire = Wire);
 
     FDC2x1x_DEVICE begin(uint8_t channelMask, bool enableSleepMode = false,
         FDC2x1x_DEGLITCH deglitchValue = FDC2x1x_DEGLITCH_33Mhz,
         bool useInternalOscillator = true, FDC2x1x_GAIN gain = FDC2x1x_GAIN_1);
 
-    // Deprecated. autoscanSeq has become obsolete. It is automatically calculated from chanMask.
-    bool begin(uint8_t channelMask, uint8_t deglitchValue, uint8_t autoscanSeq, bool useInternalOscillator);
-
     const FDC2x1x_DEVICE getDevice() const;
 
+    // Return 2 for FDC2x12 and 4 for FDC1x14
     const size_t getChannelCount() const;
 
-    // return true on success: Otherwise false.
+    // Return true on success: Otherwise false.
     bool setFrequencyDivider(uint8_t channel, uint16_t value);
 
-    // return true on success: Otherwise false.
+    // Return true on success: Otherwise false.
+    // Valid channel = 0..2 on FDC2x12 and 0..3 on FDC1x14
     bool setOffset(uint8_t channel, uint16_t value);
 
-    // return 1, if sleep mode is enabled. return 0, if sleep mode is disabled. return -1 upon I2C read error.
+    // Return 1, if sleep mode is enabled. return 0, if sleep mode is disabled. return -1 upon I2C read error.
     int isSleepModeEnabled()const;
 
-    // return sleep mode before that call or -1 upon I2C read error.
+    // Return sleep mode before that call or -1 upon I2C read error.
     int enableSleepMode();
 
-    // return sleep mode before that call or -1 upon I2C read error.
+    // Return sleep mode before that call or -1 upon I2C read error.
     int disableSleepMode();
 
-    // gives out the formatted 28 bit reading. To be used by any FDC2x1x
-    // returns FDC2x1x_INVALID_READING in case of an error.
+    // Gives out the conversion result as 28 bit value for all FDC2x1x devices,
+    // in particular also as 28 bit value for FDC212x.
+    // Returns FDC2x1x_INVALID_READING in case of an error.
     unsigned long getReading(uint8_t channel, int timeout = 128) const;
 
-    // Deprecated. To be used with FDC2112 and FDC2114.
-    // Takes in channel number, gives out the formatted 28 bit reading.
-    unsigned long getReading16(uint8_t channel, int timeout = 128) const {
-      return getReading(channel, timeout);
-    }
-
-    // Deprecated. To be used with FDC2212 and FDC2x1x.
-    // Takes in channel number, gives out the formatted 28 bit reading.
-    unsigned long getReading28(uint8_t channel, int timeout = 128) const {
-      return getReading(channel, timeout);
-    }
-
-    // return the wire object that is used for I2C communication.
+    // Return the wire object that is used for I2C communication.
     typeof(Wire)& getWire() {return _wire;}
+
 private:
     unsigned long getReading(uint8_t channel, int timeout, const int addressMSB,
         const int addressLSB) const;
@@ -125,7 +129,5 @@ private:
     typeof(Wire)& _wire;
     mutable FDC2x1x_DEVICE _device;
 };
-#endif //include guard
 
-//Added by Sloeber 
-#pragma once
+#endif // #ifndef FDC2x1x_API_H_
