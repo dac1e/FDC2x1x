@@ -227,47 +227,54 @@ bool FDC2x1x::loadSettings(uint8_t chanMask, bool enableSleepMode, uint8_t degli
 	// CCS1A1R0IH000001 -> 0001 1110 1000 0001 -> 0x1E81 	ExtOsc
 	// CCS1A1R0IH000001 -> 0001 1100 1000 0001 -> 0x1C81	IntOsc
 
-  const uint8_t chanMask_(chanMask & 0x0f);
-  const uint16_t autoScanEn = AUTOSCAN_EN[chanMask_-1];
+  const size_t n = getChannelCount();
+  if(n > 0) {
+    const uint8_t chanAvailableMask = (1 << n) - 1;
+    const uint8_t chanMask_(chanMask & chanAvailableMask);
+    const uint16_t autoScanEn = AUTOSCAN_EN[chanMask_-1];
 
-  {
-    const uint16_t singleScanChan = autoScanEn ? 0 : channelMaskToChannel(chanMask_);
-    const uint16_t config = 0x1C81 | singleScanChan |
-      (static_cast<uint16_t>(not useInternalOscillator) << FDC2x1x_OSCILLATOR_SHIFT) |
-      (static_cast<uint16_t>(enableSleepMode) << FDC2x1x_SLEEP_SHIFT);
-    write16FDC(FDC2x1x_CONFIG, config);  //set config
-  }
-
-  int32_t resetDev = read16FDC(FDC2x1x_RESET_DEV);
-  {
-    if(resetDev >= 0) { // if no read error
-      resetDev &= ~FDC2x1x_GAIN_MASK;
-      resetDev |= static_cast<uint16_t>(gain) << FDC2x1x_GAIN_SHIFT;
-      write16FDC(FDC2x1x_RESET_DEV, resetDev);
+    {
+      const uint16_t singleScanChan = autoScanEn ? 0 : channelMaskToChannel(chanMask_);
+      const uint16_t config = 0x1C81 | singleScanChan |
+        (static_cast<uint16_t>(not useInternalOscillator) << FDC2x1x_OSCILLATOR_SHIFT) |
+        (static_cast<uint16_t>(enableSleepMode) << FDC2x1x_SLEEP_SHIFT);
+      write16FDC(FDC2x1x_CONFIG, config);  //set config
     }
-  }
 
-  bool bOk = (resetDev >= 0);
-  for(size_t c = 0; bOk && (c < getChannelCount()); c++) {
-    //If channel c selected, init it..
-    if (chanMask & (0x01 << c)) {
-      bOk = loadChannelSettings(c);
+    int32_t resetDev = read16FDC(FDC2x1x_RESET_DEV);
+    {
+      if(resetDev >= 0) { // if no read error
+        resetDev &= ~FDC2x1x_GAIN_MASK;
+        resetDev |= static_cast<uint16_t>(gain) << FDC2x1x_GAIN_SHIFT;
+        write16FDC(FDC2x1x_RESET_DEV, resetDev);
+      }
     }
+
+    bool bOk = (resetDev >= 0);
+    for(size_t c = 0; bOk && (c < getChannelCount()); c++) {
+      //if channel c selected, init it..
+      if (chanMask & (0x01 << c)) {
+        bOk = loadChannelSettings(c);
+      }
+    }
+
+    if(bOk) {
+      // Autoscan: 0 = single channel, selected by CONFIG.ACTIVE_CHAN
+      // | Autoscan sequence. b00 for chan 1-2, b01 for chan 1-2-3, b10 for chan 1-2-3-4
+      // | |         Reserved - must be b0001000001
+      // | |         |  Deglitch frequency. b001 for 1 MHz, b100 for 3.3 MHz, b101 for 10 Mhz, b111 for 33 MHz
+      // | |         |  |
+      // ARR0001000001DDD -> b0000 0010 0000 1000 -> h0208
+      const uint16_t muxVal = 0x0208 | (autoScanEn << 15) | (static_cast<uint16_t>(AUTOSCAN[chanMask_-1]) << 13) | deglitchValue;
+      //
+      write16FDC(FDC2x1x_MUX_CONFIG, muxVal);  //set mux config for channels
+    }
+
+    return bOk;
   }
 
-  if(bOk) {
-    // Autoscan: 0 = single channel, selected by CONFIG.ACTIVE_CHAN
-    // | Autoscan sequence. b00 for chan 1-2, b01 for chan 1-2-3, b10 for chan 1-2-3-4
-    // | |         Reserved - must be b0001000001
-    // | |         |  Deglitch frequency. b001 for 1 MHz, b100 for 3.3 MHz, b101 for 10 Mhz, b111 for 33 MHz
-    // | |         |  |
-    // ARR0001000001DDD -> b0000 0010 0000 1000 -> h0208
-    const uint16_t muxVal = 0x0208 | (autoScanEn << 15) | (static_cast<uint16_t>(AUTOSCAN[chanMask_-1]) << 13) | deglitchValue;
-    //
-    write16FDC(FDC2x1x_MUX_CONFIG, muxVal);  //set mux config for channels
-  }
-
-  return bOk;
+  // no channels available
+  return false;
 }
 
 // inline because called once.
