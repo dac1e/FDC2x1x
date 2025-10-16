@@ -146,14 +146,14 @@ const FDC2x1x_DEVICE FDC2x1x::readDeviceId() const {
   return FDC2x1x_DEVICE_INVALID;
 }
 
-const FDC2x1x_DEVICE FDC2x1x::getDevice() const {
+FDC2x1x_DEVICE FDC2x1x::getDevice() const {
   if (_device == FDC2x1x_DEVICE_INVALID) {
     _device = readDeviceId();
   }
   return _device;
 }
 
-const size_t FDC2x1x::getChannelCount() const {
+size_t FDC2x1x::getChannelCount() const {
   switch (getDevice()) {
     case FDC2x1x_DEVICE_FDC211x:
     return 2;
