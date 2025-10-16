@@ -1,0 +1,1 @@
+Library to drive FDC2112, FDC2114, FDC2212 and FDC2214
