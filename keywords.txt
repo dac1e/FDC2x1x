@@ -1,0 +1,56 @@
+#######################################
+# Syntax Coloring Map For ExampleLibrary
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+FDC2x1x	         KEYWORD1
+FDC2x1x_DEVICE   KEYWORD1
+FDC2x1x_I2C_ADDR KEYWORD1
+FDC2x1x_DEGLITCH KEYWORD1
+FDC2x1x_GAIN     KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+begin		        KEYWORD2
+getDevice           KEYWORD2
+getChannelCount     KEYWORD2
+getReading	        KEYWORD2
+
+setFrequencyDivider KEYWORD2
+setOffset           KEYWORD2
+isSleepModeEnabled  KEYWORD2
+enableSleepMode     KEYWORD2
+disableSleepMode    KEYWORD2
+getWire             KEYWORD2
+
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+FDC2x1x_I2C_ADDR_0       LITERAL1
+FDC2x1x_I2C_ADDR_1       LITERAL1
+
+FDC2x1x_DEVICE_INVALID   LITERAL1
+FDC2x1x_DEVICE_FDC211x   LITERAL1
+FDC2x1x_DEVICE_FDC221x   LITERAL1
+
+FDC2x1x_DEGLITCH_1000Khz LITERAL1
+FDC2x1x_DEGLITCH_3300Khz LITERAL1
+FDC2x1x_DEGLITCH_10Mhz 	 LITERAL1
+FDC2x1x_DEGLITCH_33Mhz   LITERAL1
+
+FDC2x1x_GAIN_1           LITERAL1
+FDC2x1x_GAIN_4           LITERAL1
+FDC2x1x_GAIN_8           LITERAL1
+FDC2x1x_GAIN_16          LITERAL1
+
+FDC2x1x_INVALID_READING  LITERAL1
