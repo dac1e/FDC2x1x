@@ -164,7 +164,6 @@ const size_t FDC2x1x::getChannelCount() const {
 }
 
 FDC2x1x_DEVICE FDC2x1x::begin(uint8_t chanMask, bool enableSleepMode, FDC2x1x_DEGLITCH deglitchValue, bool useInternalOscillator, FDC2x1x_GAIN gain) {
-  _wire.begin();
   const FDC2x1x_DEVICE device = getDevice();
   const bool bOk = (device != FDC2x1x_DEVICE_INVALID);
   if (bOk) {
