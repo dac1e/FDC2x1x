@@ -75,10 +75,10 @@ public:
         FDC2x1x_DEGLITCH deglitchValue = FDC2x1x_DEGLITCH_33Mhz,
         bool useInternalOscillator = true, FDC2x1x_GAIN gain = FDC2x1x_GAIN_1);
 
-    const FDC2x1x_DEVICE getDevice() const;
+    FDC2x1x_DEVICE getDevice() const;
 
     // Return 2 for FDC2x12 and 4 for FDC1x14
-    const size_t getChannelCount() const;
+    size_t getChannelCount() const;
 
     // Return true on success: Otherwise false.
     bool setFrequencyDivider(uint8_t channel, uint16_t value);
