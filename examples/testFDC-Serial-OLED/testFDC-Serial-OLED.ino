@@ -177,4 +177,4 @@ int iicScan (){
   else
     Serial.println("done\n");
   return nDevices;
-  }
+}
