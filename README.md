@@ -1,9 +1,10 @@
 Library to drive FDC2112, FDC2114, FDC2212 and FDC2214
 
-This library is based on based on https://github.com/zharijs/FDC2214 which originally I wanted to re-use for my somo1ELV project. However, the original library was missing some features that I needed. So I decided to create an own library and to add the missing features.
+This library is based on based on https://github.com/zharijs/FDC2214 which originally I wanted to re-use for my somo1ELV project. However, the original library was missing some features that I needed. Since my changes with the missing features were not merged into this library, I decided to create an own library with the changes listed below.
+
 Missing features that were added:
 
-- Selection of a different I2C TwoWire interface, in case the underlying hardware supports more than one. 
+- Use a different I2C TwoWire interface as an option. 
 Solution: The Wire object to be used can be passed to the FDC2x1x constructor.
 
 - Additional interface functions:
